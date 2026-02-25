@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>A Letter For You 💌</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Pacifico&family=Fredoka:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sky-light:   #A8D8EA;
+      --sky:         #7EC8E3;
+      --grass:       #8FBC8F;
+      --grass-dark:  #6B9B6B;
+      --cloud:       #FDFEFE;
+      --sun:         #FFD966;
+      --envelope:    #F4E4C1;
+      --envelope-dark: #D4C4A1;
+      --seal:        #C85C5C;
+      --seal-dark:   #A84848;
+      --text:        #5A4A3A;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: linear-gradient(180deg, var(--sky-light) 0%, var(--sky) 100%);
+      font-family: 'Fredoka', sans-serif;
+      color: var(--text);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ══════════════════════════════════════
+       PAGE 1: ENVELOPE
+    ══════════════════════════════════════ */
+    #envelope-page {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 20;
+      perspective: 1200px;
+      transition: opacity 0.6s ease;
+    }
+    #envelope-page.flip-out { 
+      animation: pageFlipOut 1.2s cubic-bezier(.68,-0.55,.27,1.55) forwards; 
+    }
+
+    @keyframes pageFlipOut {
+      0%   { transform: rotateY(0deg); opacity: 1; }
+      100% { transform: rotateY(90deg); opacity: 0; pointer-events: none; }
+    }
+
+    .envelope-container {
+      position: relative;
+      width: min(90vw, 400px);
+      height: min(70vw, 280px);
+      animation: envelopeFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes envelopeFloat {
+      0%, 100% { transform: translateY(0) rotate(-1deg); }
+      50%      { transform: translateY(-12px) rotate(1deg); }
+    }
+
+    .envelope-body {
+      position: absolute;
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, var(--envelope) 0%, var(--envelope-dark) 100%);
+      border-radius: 8px;
+      box-shadow: 
+        0 8px 30px rgba(90,74,58,0.15),
+        inset 0 -2px 8px rgba(212,196,161,0.5);
+    }
+
+    .envelope-flap {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 55%;
+      background: linear-gradient(160deg, var(--envelope) 0%, var(--envelope-dark) 100%);
+      clip-path: polygon(0 0, 50% 60%, 100% 0);
+      box-shadow: 0 4px 12px rgba(90,74,58,0.12);
+    }
+
+    .seal {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px; height: 80px;
+      background: radial-gradient(circle at 35% 35%, var(--seal) 0%, var(--seal-dark) 100%);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      box-shadow: 0 6px 20px rgba(200,92,92,0.35);
+      display: flex; align-items: center; justify-content: center;
+      animation: sealGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes sealGlow {
+      0%, 100% { box-shadow: 0 6px 20px rgba(200,92,92,0.35); }
+      50%      { box-shadow: 0 8px 30px rgba(200,92,92,0.6); }
+    }
+
+    .seal:hover { transform: translate(-50%, -50%) scale(1.08); }
+    .seal:active { transform: translate(-50%, -50%) scale(0.95); }
+
+    .seal::after {
+      content: '💌';
+      font-size: 2rem;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+
+    .envelope-hint {
+      position: absolute;
+      bottom: -60px; left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Pacifico', cursive;
+      font-size: 1.1rem;
+      color: rgba(90,74,58,0.7);
+      animation: hintFade 2s ease-in-out infinite;
+    }
+
+    @keyframes hintFade {
+      0%, 100% { opacity: 0.5; }
+      50%      { opacity: 1; }
+    }
+
+    /* ══════════════════════════════════════
+       PAGE 2: PIXEL WORLD
+    ══════════════════════════════════════ */
+    #pixel-page {
+      position: fixed; inset: 0;
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      overflow: hidden;
+      background: linear-gradient(180deg, #A8D8EA 0%, #7EC8E3 60%, #B8E6D5 100%);
+      transition: opacity 1s ease;
+    }
+    #pixel-page.show { 
+      opacity: 1; 
+      pointer-events: all;
+      animation: pageFlipIn 1.2s cubic-bezier(.68,-0.55,.27,1.55) forwards;
+    }
+
+    @keyframes pageFlipIn {
+      0%   { transform: rotateY(-90deg); }
+      100% { transform: rotateY(0deg); }
+    }
+
+    /* ── SUN ── */
+    .sun {
+      position: absolute;
+      top: 8%; right: 12%;
+      width: 100px; height: 100px;
+      background: radial-gradient(circle, #FFE66D 0%, #FFD966 100%);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      box-shadow: 0 0 40px rgba(255,217,102,0.6);
+      animation: sunPulse 4s ease-in-out infinite;
+    }
+    .sun:hover { transform: scale(1.15) rotate(20deg); }
+    .sun.clicked { animation: sunSpin 0.6s ease; }
+
+    @keyframes sunPulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.05); }
+    }
+    @keyframes sunSpin {
+      0%   { transform: rotate(0deg) scale(1); }
+      100% { transform: rotate(360deg) scale(1.2); }
+    }
+
+    /* ── DECORATIVE CLOUDS ── */
+    .cloud {
+      position: absolute;
+      cursor: pointer;
+      transition: transform 0.3s ease, opacity 0.8s ease;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08));
+      animation: cloudFloat linear infinite;
+    }
+    .cloud:hover { transform: translateY(-8px) scale(1.05); }
+    .cloud.bounced { animation: cloudBounce 0.5s ease; }
+    .cloud.fade-out { 
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @keyframes cloudBounce {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50%      { transform: translateY(-15px) scale(1.1); }
+    }
+    
+    @keyframes cloudFloat {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(var(--drift, 50px)); }
+    }
+
+    .cloud svg { display: block; }
+    
+    /* Cloud image container */
+    .cloud-image {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 70%;
+      height: 70%;
+      border-radius: 50%;
+      overflow: hidden;
+      pointer-events: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .cloud-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    /* ── GROUND ── */
+    .ground {
+      position: absolute;
+      bottom: 0;
+      width: 100%; height: 35%;
+      background: linear-gradient(180deg, var(--grass) 0%, var(--grass-dark) 100%);
+      border-top: 4px solid var(--grass-dark);
+    }
+
+    /* grass blades */
+    .grass-blade {
+      position: absolute;
+      bottom: 0;
+      width: 8px;
+      background: var(--grass-dark);
+      border-radius: 4px 4px 0 0;
+      transform-origin: bottom;
+      animation: grassSway 3s ease-in-out infinite;
+    }
+    @keyframes grassSway {
+      0%, 100% { transform: rotate(-2deg); }
+      50%      { transform: rotate(2deg); }
+    }
+
+    /* ── FLOWERS ── */
+    .flower {
+      position: absolute;
+      cursor: pointer;
+      font-size: 2rem;
+      transition: transform 0.2s ease;
+      animation: flowerSway 2.5s ease-in-out infinite;
+    }
+    .flower:hover { transform: scale(1.2) rotate(15deg); }
+    .flower.picked { animation: flowerPop 0.4s ease forwards; }
+
+    @keyframes flowerSway {
+      0%, 100% { transform: rotate(-3deg); }
+      50%      { transform: rotate(3deg); }
+    }
+    @keyframes flowerPop {
+      0%   { transform: scale(1) rotate(0deg); }
+      50%  { transform: scale(1.5) rotate(20deg); }
+      100% { transform: scale(0) rotate(40deg); opacity: 0; }
+    }
+
+    /* ── BUTTERFLIES ── */
+    .butterfly {
+      position: absolute;
+      font-size: 1.8rem;
+      cursor: pointer;
+      animation: butterflyFloat linear infinite;
+      transition: transform 0.2s ease;
+    }
+    .butterfly:hover { transform: scale(1.3); }
+    @keyframes butterflyFloat {
+      0%   { transform: translate(0, 0) rotate(0deg); }
+      25%  { transform: translate(30px, -20px) rotate(10deg); }
+      50%  { transform: translate(60px, 0px) rotate(-5deg); }
+      75%  { transform: translate(30px, 20px) rotate(8deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    /* ── PIXEL GIRL ON BIKE ── */
+    .bike-scene {
+      position: absolute;
+      bottom: 35%;
+      left: 15%;
+      animation: bikeRide 8s ease-in-out infinite;
+    }
+
+    @keyframes bikeRide {
+      0%   { left: 15%; }
+      50%  { left: 65%; }
+      100% { left: 15%; }
+    }
+
+    .pixel-girl {
+      width: 100px;
+      height: 100px;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      position: relative;
+      animation: bikeBounce 0.4s ease-in-out infinite;
+    }
+
+    @keyframes bikeBounce {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-4px); }
+    }
+
+    /* ── BIRDS ── */
+    .bird {
+      position: absolute;
+      font-size: 1.5rem;
+      animation: birdFly linear infinite;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .bird:hover { transform: scale(1.3); }
+    @keyframes birdFly {
+      0%   { left: -50px; }
+      100% { left: 110%; }
+    }
+
+    /* ── AUDIO CONTROLS ── */
+    .audio-control {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 30;
+      background: rgba(255,255,255,0.9);
+      border: 3px solid var(--grass);
+      border-radius: 50px;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-family: 'VT323', monospace;
+      font-size: 1.2rem;
+      color: var(--text);
+      transition: transform 0.2s ease, background 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .audio-control:hover { 
+      transform: scale(1.05); 
+      background: rgba(255,255,255,1);
+    }
+    .audio-control.playing::before { content: '🎵 '; }
+    .audio-control.paused::before { content: '⏸️ '; }
+
+    /* ── PARTICLE EFFECTS ── */
+    .sparkle {
+      position: fixed;
+      pointer-events: none;
+      font-size: 1.2rem;
+      z-index: 99;
+      animation: sparkleFloat 1s ease-out forwards;
+    }
+    @keyframes sparkleFloat {
+      0%   { opacity: 1; transform: translate(0, 0) scale(1); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.3); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ PAGE 1: ENVELOPE ═══════════ -->
+<div id="envelope-page">
+  <div class="envelope-container">
+    <div class="envelope-body"></div>
+    <div class="envelope-flap"></div>
+    <div class="seal" id="seal"></div>
+    <div class="envelope-hint">Press the seal ✨</div>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE 2: PIXEL WORLD ═══════════ -->
+<div id="pixel-page">
+  
+  <!-- Sun -->
+  <div class="sun" id="sun"></div>
+
+  <!-- Centered Karaoke Lyrics Display -->
+  <div id="lyric-display" style="
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 15;
+    text-align: center;
+    pointer-events: none;
+  ">
+    <div id="current-lyric" style="
+      font-family: 'Pacifico', cursive;
+      font-size: clamp(1.8rem, 5vw, 3.2rem);
+      color: #5A4A3A;
+      text-shadow: 
+        2px 2px 4px rgba(255,255,255,0.9),
+        -1px -1px 2px rgba(255,255,255,0.7),
+        0 0 20px rgba(255,255,255,0.5);
+      max-width: 90vw;
+      line-height: 1.4;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    "></div>
+  </div>
+
+  <!-- ⭐ DECORATIVE CLOUDS WITH IMAGES ⭐ -->
+  <!-- Customize: Add your image paths in the assets folder -->
+  
+  <div class="cloud" id="deco-cloud1" style="top:15%; left:10%; width:180px; --drift:30px; animation-duration:25s;">
+    <svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="50" cy="50" rx="45" ry="35" fill="#FDFEFE" opacity="0.95"/>
+      <ellipse cx="100" cy="40" rx="60" ry="40" fill="#FDFEFE" opacity="0.95"/>
+      <ellipse cx="150" cy="50" rx="45" ry="35" fill="#FDFEFE" opacity="0.95"/>
+    </svg>
+    <!-- 💡 ADD YOUR IMAGE HERE -->
+    <div class="cloud-image">
+      <img src="assets/cloud-image-1.jpg" alt="" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <div class="cloud" id="deco-cloud2" style="top:8%; right:15%; width:160px; --drift:-25px; animation-duration:30s; animation-delay:5s;">
+    <svg viewBox="0 0 180 75" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="45" cy="48" rx="40" ry="32" fill="#FDFEFE" opacity="0.95"/>
+      <ellipse cx="90" cy="38" rx="55" ry="38" fill="#FDFEFE" opacity="0.95"/>
+      <ellipse cx="135" cy="48" rx="40" ry="32" fill="#FDFEFE" opacity="0.95"/>
+    </svg>
+    <!-- 💡 ADD YOUR IMAGE HERE -->
+    <div class="cloud-image">
+      <img src="assets/cloud-image-2.jpg" alt="" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <div class="cloud" id="deco-cloud3" style="top:28%; left:35%; width:200px; --drift:40px; animation-duration:28s; animation-delay:10s;">
+    <svg viewBox="0 0 220 90" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="60" cy="55" rx="50" ry="40" fill="#FDFEFE" opacity="0.95"/>
+      <ellipse cx="120" cy="45" rx="65" ry="45" fill="#FDFEFE" opacity="0.95"/>
+      <ellipse cx="170" cy="55" rx="50" ry="40" fill="#FDFEFE" opacity="0.95"/>
+    </svg>
+    <!-- 💡 ADD YOUR IMAGE HERE -->
+    <div class="cloud-image">
+      <img src="assets/cloud-image-3.jpg" alt="" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <div class="cloud" id="deco-cloud4" style="top:38%; right:8%; width:170px; --drift:-35px; animation-duration:32s; animation-delay:15s;">
+    <svg viewBox="0 0 190 80" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="50" cy="50" rx="45" ry="35" fill="#FDFEFE" opacity="0.95"/>
+      <ellipse cx="95" cy="40" rx="55" ry="40" fill="#FDFEFE" opacity="0.95"/>
+      <ellipse cx="140" cy="50" rx="45" ry="35" fill="#FDFEFE" opacity="0.95"/>
+    </svg>
+    <!-- 💡 ADD YOUR IMAGE HERE -->
+    <div class="cloud-image">
+      <img src="assets/cloud-image-4.jpg" alt="" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <div class="cloud" id="deco-cloud5" style="top:20%; left:60%; width:150px; --drift:20px; animation-duration:26s; animation-delay:8s;">
+    <svg viewBox="0 0 170 70" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="45" cy="45" rx="40" ry="30" fill="#FDFEFE" opacity="0.95"/>
+      <ellipse cx="85" cy="35" rx="50" ry="35" fill="#FDFEFE" opacity="0.95"/>
+      <ellipse cx="125" cy="45" rx="40" ry="30" fill="#FDFEFE" opacity="0.95"/>
+    </svg>
+    <!-- 💡 ADD YOUR IMAGE HERE -->
+    <div class="cloud-image">
+      <img src="assets/cloud-image-5.jpg" alt="" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <!-- Birds -->
+  <div class="bird" id="bird1" style="top:8%; animation-duration:15s; animation-delay:0s;">🐦</div>
+  <div class="bird" id="bird2" style="top:22%; animation-duration:18s; animation-delay:5s;">🦅</div>
+
+  <!-- Butterflies -->
+  <div class="butterfly" id="butterfly1" style="top:35%; left:75%; animation-duration:6s;">🦋</div>
+  <div class="butterfly" id="butterfly2" style="top:48%; left:25%; animation-duration:7s; animation-delay:2s;">🦋</div>
+
+  <!-- Ground -->
+  <div class="ground">
+    <!-- Grass blades -->
+    <div class="grass-blade" style="left:5%; height:25px; animation-delay:0s;"></div>
+    <div class="grass-blade" style="left:12%; height:30px; animation-delay:0.3s;"></div>
+    <div class="grass-blade" style="left:18%; height:22px; animation-delay:0.6s;"></div>
+    <div class="grass-blade" style="left:28%; height:28px; animation-delay:0.2s;"></div>
+    <div class="grass-blade" style="left:35%; height:24px; animation-delay:0.5s;"></div>
+    <div class="grass-blade" style="left:42%; height:26px; animation-delay:0.1s;"></div>
+    <div class="grass-blade" style="left:55%; height:23px; animation-delay:0.4s;"></div>
+    <div class="grass-blade" style="left:62%; height:29px; animation-delay:0.7s;"></div>
+    <div class="grass-blade" style="left:70%; height:25px; animation-delay:0.3s;"></div>
+    <div class="grass-blade" style="left:78%; height:27px; animation-delay:0.6s;"></div>
+    <div class="grass-blade" style="left:85%; height:24px; animation-delay:0.2s;"></div>
+    <div class="grass-blade" style="left:92%; height:26px; animation-delay:0.5s;"></div>
+
+    <!-- Flowers -->
+    <div class="flower" id="flower1" style="bottom:8%; left:10%;">🌼</div>
+    <div class="flower" id="flower2" style="bottom:12%; left:25%;">🌸</div>
+    <div class="flower" id="flower3" style="bottom:6%; left:40%;">🌺</div>
+    <div class="flower" id="flower4" style="bottom:10%; left:58%;">🌻</div>
+    <div class="flower" id="flower5" style="bottom:8%; left:72%;">🌷</div>
+    <div class="flower" id="flower6" style="bottom:11%; left:88%;">🌼</div>
+  </div>
+
+  <!-- Bike Scene with Pixel Girl -->
+  <div class="bike-scene">
+    <canvas id="pixel-girl-canvas" class="pixel-girl" width="100" height="100"></canvas>
+  </div>
+
+  <!-- Audio Control -->
+  <div class="audio-control paused" id="audioControl">Click to Play Music</div>
+</div>
+
+<!-- Background Music -->
+<audio id="bgMusic" loop>
+  <source src="assets/bad-wave-to-earth.mp3.mp3" type="audio/mpeg">
+  <!-- NOTE: You need to add the MP3 file in the "assets" folder -->
+</audio>
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CLOUD IMAGE ROTATION SYSTEM
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// ⭐ CUSTOMIZE YOUR CLOUD IMAGES HERE! ⭐
+// Add all your image filenames from the assets folder
+const cloudImagePool = [
+  'assets/1.jpg',
+  'assets/1.jpg',
+  'assets/2.jpg',
+  'assets/3.jpg',
+  'assets/4.jpg',
+  'assets/5.jpg',
+  'assets/6.jpg',
+  'assets/7.jpg',
+  'assets/8.jpg',
+  'assets/9.jpg',
+  'assets/10.jpg',
+  'assets/11.jpg',
+  'assets/12.jpg',
+  'assets/13.jpg',
+  'assets/14.jpg',
+  'assets/15.jpg',
+  'assets/16.jpg',
+  'assets/17.jpg',
+  'assets/18.jpg',
+  'assets/19.jpg',
+
+  // Add more images here!
+  // Example:
+  // 'assets/photo1.png',
+  // 'assets/photo2.jpg',
+];
+
+const cloudIds = ['deco-cloud1', 'deco-cloud2', 'deco-cloud3', 'deco-cloud4', 'deco-cloud5'];
+let cloudRotationIntervals = [];
+
+function startCloudRotation(){
+  // Each cloud cycles through random images
+  cloudIds.forEach((cloudId, index) => {
+    // Random interval between 8-15 seconds for each cloud
+    const interval = 8000 + Math.random() * 7000;
+    
+    const rotationInterval = setInterval(() => {
+      cycleCloudImage(cloudId);
+    }, interval);
+    
+    cloudRotationIntervals.push(rotationInterval);
+  });
+}
+
+function stopCloudRotation(){
+  cloudRotationIntervals.forEach(interval => clearInterval(interval));
+  cloudRotationIntervals = [];
+}
+
+function cycleCloudImage(cloudId){
+  const cloud = document.getElementById(cloudId);
+  if(!cloud) return;
+  
+  const imgElement = cloud.querySelector('.cloud-image img');
+  if(!imgElement) return;
+  
+  // Fade out cloud
+  cloud.classList.add('fade-out');
+  
+  setTimeout(() => {
+    // Pick a random image from the pool
+    const randomImage = cloudImagePool[Math.floor(Math.random() * cloudImagePool.length)];
+    imgElement.src = randomImage;
+    
+    // Fade cloud back in
+    cloud.classList.remove('fade-out');
+  }, 800); // Wait for fade out to complete
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// KARAOKE LYRICS SYSTEM
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// ⭐ CUSTOMIZE YOUR LYRICS HERE! ⭐
+// Add your lyrics and timing (in seconds from start of song)
+const karaokeData = [
+  { time: 2,   text: "How could my day be bad" },
+  { time: 5,   text: "when I'm with you?" },
+  { time: 7.8,   text: "You're the only one" },
+  { time: 9.9,  text: "who makes me laugh" },
+  { time: 14,  text: "So how can my day be bad?" },
+  
+  { time: 19,  text: "It's a day for you" },
+  { time: 30,  text: "Lately, life's so boring" },
+  { time: 35,  text: "I've been watching Netflix" },
+  { time: 38.3,  text: "all day long" },
+  { time: 41,  text: "I thought there would be" },
+  
+  { time: 44,  text: "no things left to watch" },
+  { time: 49,  text: "So I let myself out" },
+  { time: 57,  text: "When I went to the park" },
+  { time: 62,  text: "I recognised you" },
+  { time: 66,  text: "at a glance" },
+  
+  { time: 71,  text: "Face to face" },
+  { time: 73,  text: "we just smiled" },
+  { time: 74.5,  text: "We already know" },
+  { time: 78.3,  text: "that we'll be together(we'll be together)" },
+  { time: 86,  text: "How could my day be bad" },
+  
+  { time: 89,  text: "when I'm with you?" },
+  { time: 91.2,  text: "You're the only one" },
+  { time: 93.8,  text: "who makes me laugh" },
+  { time: 98,  text: "So how can my day be bad?" },
+  { time: 105,  text: "It's a day for you" },
+  { time: 109.8,  text: "Oh, baby" },
+  
+  { time: 114,  text: "Coffee in the morning" },
+  { time: 119.8,  text: "you and the sun" },
+  { time: 122.9,  text: "There's a brown hue" },
+  { time: 126,  text: "in your eyes" },
+  { time: 130,  text: "How pretty it is" },
+  
+  { time: 132,  text: "I think I'm in love" },
+  { time: 138,  text: "Oh-wooo" },
+  { time: 170, text: "When I went to the park" },
+  { time: 178, text: "I recognised you" },
+  { time: 179, text: "at a glance" },
+  { time: 183, text: "Face to face" },
+  
+  { time: 186, text: "we smiled" },
+  { time: 187, text: "And I finally" },
+  { time: 192.1, text: "held your hands" },
+  { time: 195, text: "How could my day be bad" },
+  { time: 199, text: "when I'm with you?" },
+  
+  { time: 201, text: "You're the only one" },
+  { time: 203, text: "who makes me laugh" },
+  { time: 206.8, text: "So how can my day be bad?" },
+  { time: 213.2, text: "It's a day for you" },
+  { time: 219, text: "Oh, baby" },
+  { time: 223, text: "How could my day be bad" },
+  
+  { time: 227, text: "when I'm with you?" },
+  { time: 230, text: "You're the only one" },
+  { time: 232, text: "who gives me love" },
+  { time: 235.8, text: "So how can my day be bad?" },
+  { time: 241.8, text: "It's a day for you" },
+  { time: 248, text: "Oh, baby" },
+  { time: 250, text: "💖" },
+  
+  // Add more lyrics with their timing here!
+];
+
+let currentLyricIndex = 0;
+let lyricsInterval = null;
+
+function startKaraoke(){
+  currentLyricIndex = 0;
+  
+  // Check lyrics timing and display
+  lyricsInterval = setInterval(()=>{
+    if(!musicPlaying || !bgMusic || bgMusic.paused){
+      return;
+    }
+    
+    const currentTime = bgMusic.currentTime;
+    
+    // Display lyrics that should appear now
+    while(currentLyricIndex < karaokeData.length && 
+          karaokeData[currentLyricIndex].time <= currentTime){
+      
+      displayLyric(karaokeData[currentLyricIndex].text);
+      currentLyricIndex++;
+    }
+  }, 100); // Check every 100ms for smooth timing
+}
+
+function stopKaraoke(){
+  if(lyricsInterval){
+    clearInterval(lyricsInterval);
+    lyricsInterval = null;
+  }
+  // Hide lyrics when stopped
+  const lyricEl = document.getElementById('current-lyric');
+  if(lyricEl) lyricEl.style.opacity = '0';
+}
+
+function displayLyric(text){
+  const lyricEl = document.getElementById('current-lyric');
+  
+  // Fade out
+  lyricEl.style.opacity = '0';
+  
+  // Change text and fade in
+  setTimeout(()=>{
+    lyricEl.textContent = text;
+    lyricEl.style.opacity = '1';
+  }, 300);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ENVELOPE SEAL INTERACTION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const envelopePage = document.getElementById('envelope-page');
+const pixelPage = document.getElementById('pixel-page');
+const seal = document.getElementById('seal');
+
+seal.addEventListener('click', openEnvelope);
+seal.addEventListener('touchstart', (e)=>{ e.preventDefault(); openEnvelope(); }, {passive:false});
+
+function openEnvelope(){
+  seal.style.pointerEvents = 'none';
+  
+  // Start playing music immediately on user interaction (seal click)
+  bgMusic.play().then(()=>{
+    musicPlaying = true;
+    audioControl.classList.remove('paused');
+    audioControl.classList.add('playing');
+    audioControl.textContent = 'Pause Music';
+    
+    // Start karaoke lyrics
+    startKaraoke();
+  }).catch(e=>{
+    console.log('Music play failed:', e);
+  });
+  
+  // Animate page transition
+  envelopePage.classList.add('flip-out');
+  setTimeout(()=>{
+    pixelPage.classList.add('show');
+    drawPixelGirl();
+    
+    // Start cloud image rotation
+    startCloudRotation();
+  }, 600);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PIXEL ART GIRL (black curly long hair)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function drawPixelGirl(){
+  const canvas = document.getElementById('pixel-girl-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  const p = 4; // pixel size
+
+  // Skin tone
+  ctx.fillStyle = '#F4C2A0';
+  
+  // Face
+  ctx.fillRect(6*p, 2*p, 8*p, 6*p);
+  
+  // Black curly hair (long)
+  ctx.fillStyle = '#2C1810';
+  // Top of head
+  ctx.fillRect(5*p, 1*p, 10*p, 2*p);
+  ctx.fillRect(4*p, 2*p, 2*p, 3*p);
+  ctx.fillRect(14*p, 2*p, 2*p, 3*p);
+  // Long hair down sides (curly effect with irregular pattern)
+  ctx.fillRect(4*p, 5*p, 2*p, 8*p);
+  ctx.fillRect(14*p, 5*p, 2*p, 8*p);
+  // Curls/volume
+  ctx.fillRect(3*p, 6*p, 1*p, 4*p);
+  ctx.fillRect(16*p, 6*p, 1*p, 4*p);
+  ctx.fillRect(3*p, 11*p, 2*p, 2*p);
+  ctx.fillRect(15*p, 11*p, 2*p, 2*p);
+
+  // Eyes
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(8*p, 4*p, 1*p, 1*p);
+  ctx.fillRect(11*p, 4*p, 1*p, 1*p);
+
+  // Smile
+  ctx.fillRect(9*p, 6*p, 2*p, 1*p);
+
+  // Shirt (pink)
+  ctx.fillStyle = '#FFB6C1';
+  ctx.fillRect(6*p, 8*p, 8*p, 5*p);
+  
+  // Arms
+  ctx.fillStyle = '#F4C2A0';
+  ctx.fillRect(5*p, 9*p, 2*p, 4*p);
+  ctx.fillRect(13*p, 9*p, 2*p, 4*p);
+
+  // Pants (blue jeans)
+  ctx.fillStyle = '#4A7BA7';
+  ctx.fillRect(7*p, 13*p, 3*p, 5*p);
+  ctx.fillRect(10*p, 13*p, 3*p, 5*p);
+
+  // Shoes
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(6*p, 18*p, 4*p, 2*p);
+  ctx.fillRect(10*p, 18*p, 4*p, 2*p);
+
+  // BIKE
+  // Wheels (black circles)
+  ctx.fillStyle = '#333333';
+  ctx.fillRect(2*p, 19*p, 4*p, 4*p);
+  ctx.fillRect(14*p, 19*p, 4*p, 4*p);
+  ctx.fillStyle = '#666666';
+  ctx.fillRect(3*p, 20*p, 2*p, 2*p);
+  ctx.fillRect(15*p, 20*p, 2*p, 2*p);
+
+  // Frame (red)
+  ctx.fillStyle = '#E74C3C';
+  ctx.fillRect(6*p, 16*p, 8*p, 1*p);
+  ctx.fillRect(10*p, 14*p, 1*p, 3*p);
+  ctx.fillRect(6*p, 15*p, 1*p, 2*p);
+
+  // Handlebars
+  ctx.fillStyle = '#888888';
+  ctx.fillRect(10*p, 13*p, 3*p, 1*p);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// INTERACTIVE ELEMENTS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Sun click
+const sun = document.getElementById('sun');
+sun.addEventListener('click', ()=>{
+  sun.classList.add('clicked');
+  createSparkles(sun);
+  setTimeout(()=>sun.classList.remove('clicked'), 600);
+  playPop();
+});
+
+// Decorative clouds bounce
+['deco-cloud1','deco-cloud2','deco-cloud3','deco-cloud4','deco-cloud5'].forEach(id=>{
+  const cloud = document.getElementById(id);
+  if(cloud){
+    cloud.addEventListener('click', ()=>{
+      cloud.classList.add('bounced');
+      createSparkles(cloud);
+      setTimeout(()=>cloud.classList.remove('bounced'), 500);
+      playPop();
+    });
+  }
+});
+
+// Flowers pick
+['flower1','flower2','flower3','flower4','flower5','flower6'].forEach(id=>{
+  const flower = document.getElementById(id);
+  flower.addEventListener('click', ()=>{
+    flower.classList.add('picked');
+    createSparkles(flower);
+    playPop();
+    setTimeout(()=>flower.remove(), 400);
+  });
+});
+
+// Butterflies
+['butterfly1','butterfly2'].forEach(id=>{
+  const bf = document.getElementById(id);
+  bf.addEventListener('click', ()=>{
+    createSparkles(bf);
+    playPop();
+  });
+});
+
+// Birds
+['bird1','bird2'].forEach(id=>{
+  const bird = document.getElementById(id);
+  bird.addEventListener('click', ()=>{
+    createSparkles(bird);
+    playPop();
+  });
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SPARKLE EFFECTS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function createSparkles(el){
+  const rect = el.getBoundingClientRect();
+  const cx = rect.left + rect.width/2;
+  const cy = rect.top + rect.height/2;
+  const emojis = ['✨','⭐','💫','🌟','💖'];
+  
+  for(let i=0; i<6; i++){
+    const sparkle = document.createElement('div');
+    sparkle.className = 'sparkle';
+    sparkle.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    const angle = (i/6)*Math.PI*2;
+    const dist = 40 + Math.random()*30;
+    const tx = Math.cos(angle)*dist;
+    const ty = Math.sin(angle)*dist;
+    sparkle.style.cssText = `left:${cx}px; top:${cy}px; --tx:${tx}px; --ty:${ty}px;`;
+    document.body.appendChild(sparkle);
+    setTimeout(()=>sparkle.remove(), 1000);
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// AUDIO CONTROL
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const bgMusic = document.getElementById('bgMusic');
+const audioControl = document.getElementById('audioControl');
+let musicPlaying = false;
+
+audioControl.addEventListener('click', toggleMusic);
+
+function toggleMusic(){
+  if(musicPlaying){
+    bgMusic.pause();
+    stopKaraoke();
+    audioControl.classList.remove('playing');
+    audioControl.classList.add('paused');
+    audioControl.textContent = 'Play Music';
+    musicPlaying = false;
+  } else {
+    bgMusic.play().catch(e=>console.log('Audio play failed:', e));
+    startKaraoke();
+    audioControl.classList.remove('paused');
+    audioControl.classList.add('playing');
+    audioControl.textContent = 'Pause Music';
+    musicPlaying = true;
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SOUND EFFECTS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let audioCtx = null;
+function playPop(){
+  try{
+    if(!audioCtx) audioCtx = new(window.AudioContext||window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = 600 + Math.random()*200;
+    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15);
+    osc.start(); osc.stop(audioCtx.currentTime+0.15);
+  }catch(e){}
+}
+</script>
+</body>
+</html>
